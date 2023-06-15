@@ -1,14 +1,21 @@
 import sqlite3
 
-class UsuarioDao:
+class UserDao:
     def connect(self ): 
-        self.conn = sqlite3.connect('../../library.db') 
+        self.conn = sqlite3.connect('./app/database/library.db') 
         self.cursor = self.conn.cursor()
 
     def disconnect(self):
         self.cursor.close()
         self.conn.close()
 
+    def exists(self, id):
+        self.connect()
+        result = self.cursor.execute("SELECT COUNT(*) FROM usuario WHERE id = ?", (id,))
+        count = result.fetchone()[0]
+        self.disconnect()
+        return count > 0
+    
     def save(self, user):
       params = [user['nome'], user['cpf'], user['email'], user['telefone'], user['login'], user['senha']]
       self.connect()
@@ -31,11 +38,12 @@ class UsuarioDao:
         return users
     
     def get_user_by_id(self, id):
+        params = [ id ]
         self.connect()
         self.cursor.execute("""
           SELECT * FROM usuario
           WHERE id=?
-        """, (id,))
+        """, (params))
 
         user = self.cursor.fetchone()
         self.disconnect()
@@ -43,15 +51,16 @@ class UsuarioDao:
 
     def update(self, user):
         params = [user['nome'], user['email'], user['telefone'], user['login'], user['senha'], user['id']]
+        
         self.connect()
         result = self.cursor.execute("""
-                      UPDATE usuario 
-                      SET nome = ?, 
-                      email = ?, 
-                      telefone = ?,
-                      login=?, 
-                      senha=?
-                      WHERE id = ?;
+                    UPDATE usuario 
+                    SET nome = :nome, 
+                    email = :email, 
+                    telefone = :telefone,
+                    login = :login, 
+                    senha = :senha
+                    WHERE id = :id;
                   """, params) 
         modified_registers = result.rowcount 
         self.conn.commit() 
