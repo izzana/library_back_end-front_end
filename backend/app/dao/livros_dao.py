@@ -49,8 +49,8 @@ class LivrosDao:
                       SET nome = ?, 
                       email = ?, 
                       telefone = ?,
-                      login=?, 
-                      senha=?
+                      login = ?, 
+                      senha = ?
                       WHERE id = ?;
                   """, params) 
         modified_registers = result.rowcount 
