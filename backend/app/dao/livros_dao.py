@@ -2,13 +2,20 @@ import sqlite3
 
 class LivrosDao:
     def connect(self): 
-        self.conn = sqlite3.connect('../../library.db') 
+        self.conn = sqlite3.connect('./app/database/library.db') 
         self.cursor = self.conn.cursor()
 
     def disconnect(self):
         self.cursor.close()
         self.conn.close()
 
+    def exists(self, id):
+        self.connect()
+        result = self.cursor.execute("SELECT COUNT(*) FROM livros WHERE id = ?", (id,))
+        count = result.fetchone()[0]
+        self.disconnect()
+        return count > 0
+    
     def save(self, livro):
         params = [livro['titulo'], livro['autor'], livro['ano_publicacao'] , livro['editora'] , livro['tipo_livro'], livro['impresso'], livro['localizacao']]
         self.connect()
@@ -30,30 +37,57 @@ class LivrosDao:
         self.disconnect()
         return livros
     
-    def get_livro_by_autor(self, autor):#tá certim
+    def get_book_by_author(self, autor):
         self.connect()
         self.cursor.execute("""
           SELECT * FROM livros
-          WHERE autor like ?
+          WHERE autor LIKE '%' || ? || '%'
         """, (autor,))
 
-        livro = self.cursor.fetchone()
+        livros = self.cursor.fetchall()
+        self.disconnect()
+        return livros
+    
+
+    def get_book_by_name(self, name):
+        self.connect()
+        self.cursor.execute("""
+            SELECT * FROM livros
+            WHERE titulo LIKE '%' || ? || '%' 
+        """, (name,))
+
+        livro = self.cursor.fetchall()
         self.disconnect()
         return livro
-    
-    def update(self, user):
-        params = [user['nome'], user['email'], user['telefone'], user['login'], user['senha'], user['id']]
+
+
+    def update(self, book):
+        params = [book['titulo'], book['autor'], book['ano_publicacao'], book['editora'], book['tipo_livro'], book['impresso'], book['id']]
         self.connect()
         result = self.cursor.execute("""
-                      UPDATE usuario 
-                      SET nome = ?, 
-                      email = ?, 
-                      telefone = ?,
-                      login = ?, 
-                      senha = ?
+                      UPDATE livros 
+                      SET titulo = ?, 
+                      autor = ?, 
+                      ano_publicacao = ?,
+                      editora = ?, 
+                      tipo_livro = ?,
+                      impresso =?
                       WHERE id = ?;
                   """, params) 
         modified_registers = result.rowcount 
         self.conn.commit() 
         self.disconnect()
         return modified_registers
+    
+    
+    def delete(self, id):
+        params = [ id ]
+        self.connect()
+        result = self.cursor.execute("""
+                      DELETE FROM livros 
+                      WHERE id = ?;
+                  """, params) 
+        modified_registers = result.rowcount 
+        self.conn.commit() 
+        self.disconnect()
+        return modified_registers    
