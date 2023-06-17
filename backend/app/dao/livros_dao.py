@@ -20,7 +20,7 @@ class LivrosDao:
         params = [livro['titulo'], livro['autor'], livro['ano_publicacao'] , livro['editora'] , livro['tipo_livro'], livro['impresso'], livro['localizacao']]
         self.connect()
         result = self.cursor.execute("""
-                      INSERT INTO livros (titulo, autor, ano_publicacao, editora, tipo_livro, impresso, localizacao) VALUES (?,?,?,?,?,?,?)
+                      INSERT INTO livros (titulo, autor, ano_publicacao, editora, tipo_livro, impresso, localizacao ) VALUES (?,?,?,?,?,?,?)
                   """, params) 
         modified_registers = result.rowcount 
         self.conn.commit() 
@@ -47,7 +47,6 @@ class LivrosDao:
         livros = self.cursor.fetchall()
         self.disconnect()
         return livros
-    
 
     def get_book_by_name(self, name):
         self.connect()
@@ -60,9 +59,8 @@ class LivrosDao:
         self.disconnect()
         return livro
 
-
     def update(self, book):
-        params = [book['titulo'], book['autor'], book['ano_publicacao'], book['editora'], book['tipo_livro'], book['impresso'], book['id']]
+        params = [book['titulo'], book['autor'], book['ano_publicacao'], book['editora'], book['tipo_livro'], book['impresso'], book['id'],  book['emprestado']]
         self.connect()
         result = self.cursor.execute("""
                       UPDATE livros 
@@ -71,7 +69,8 @@ class LivrosDao:
                       ano_publicacao = ?,
                       editora = ?, 
                       tipo_livro = ?,
-                      impresso =?
+                      impresso = ?
+                      emprestado = ?
                       WHERE id = ?;
                   """, params) 
         modified_registers = result.rowcount 
@@ -79,15 +78,34 @@ class LivrosDao:
         self.disconnect()
         return modified_registers
     
-    
+    # def delete(self, id):
+    #     params = [ id ]
+    #     self.connect()
+    #     result = self.cursor.execute("""
+    #                   DELETE FROM livros 
+    #                   WHERE id = ?;
+    #               """, params) 
+    #     modified_registers = result.rowcount 
+    #     self.conn.commit() 
+    #     self.disconnect()
+    #     return modified_registers    
+
     def delete(self, id):
-        params = [ id ]
         self.connect()
-        result = self.cursor.execute("""
-                      DELETE FROM livros 
-                      WHERE id = ?;
-                  """, params) 
-        modified_registers = result.rowcount 
-        self.conn.commit() 
+        
+        # Verificar se o livro está emprestado
+        result = self.cursor.execute("SELECT emprestado FROM livros WHERE id = ?", (id,))
+        livro_emprestado = result.fetchone()[0]
+        
+        if livro_emprestado:
+            # O livro está emprestado, não é possível excluir
+            self.disconnect()
+            return 0
+        
+        # O livro não está emprestado, pode ser excluído
+        params = [id]
+        result = self.cursor.execute("DELETE FROM livros WHERE id = ?", params)
+        modified_registers = result.rowcount
+        self.conn.commit()
         self.disconnect()
-        return modified_registers    
+        return modified_registers

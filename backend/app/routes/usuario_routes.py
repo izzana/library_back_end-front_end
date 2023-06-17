@@ -4,7 +4,7 @@ from app.dao.usuario_dao import UserDao
 usuario_routes = Blueprint("usuario", __name__)
 user_dao = UserDao()
 
-@usuario_routes.route("/api/v1/usuario", methods=["POST"])
+@usuario_routes.route("/api/v1/usuario/save", methods=["POST"])
 def save():
   print("method save invocado")
   try:
@@ -16,8 +16,9 @@ def save():
         and 'login' in request.json \
         and 'senha' in request.json:
             user_dao.save(request.json)
-            return {"msg":"contato salvo com sucesso."}
-    return {"msg":"Você não preencheu todos os campos corretamente"}
+            return {"msg":"Usuário salvo com sucesso."}
+        return {"msg":"Você não preencheu todos os campos corretamente"}
+    return {"msg":"Objeto não encontrado"}, 400
   except Exception as e:
     return {'error': str(e)}
 
@@ -44,8 +45,7 @@ def get_user_by_id(id):
         return {'error': str(e)}
 
 
-
-@usuario_routes.route("/api/v1/usuario", methods=["GET"])
+@usuario_routes.route("/api/v1/usuarios", methods=["GET"])
 def get_all_users():
     print("method get_all_users invocado")
     try:
@@ -64,7 +64,7 @@ def get_all_users():
     except Exception as e:
         return {'error': str(e)}
     
-@usuario_routes.route("/api/v1/usuario", methods=["PUT"])
+@usuario_routes.route("/api/v1/usuario/atualizar", methods=["PUT"])
 def update():
     print("Método Atualizar foi invocado")
     try:
@@ -80,17 +80,20 @@ def update():
                     return {"msg": "Contato atualizado com sucesso."}
                 return {"msg": "Você não preencheu todos os campos corretamente"}
             return {"msg": "Usuário não encontrado."}
+        return {"msg": "Objeto não encontrado"}
     except Exception as e:
         return {'error': str(e)}
 
 
-@usuario_routes.route("/api/v1/usuario/<string:id>", methods=["DELETE"])
+@usuario_routes.route("/api/v1/usuario/deletar/<string:id>", methods=["DELETE"])
 def delete(id):
     print("Método Remover foi invocado")
     try:
-        if user_dao.delete(id) == 1:
-            return {"msg":"Usuário removido com sucesso."}
-        return {"msg":"O usuario não foi removido"}
+        if user_dao.exists(id):
+            if user_dao.delete(id) == 1:
+                return {"msg":"Usuário removido com sucesso."}
+            return {"msg":"O usuario não foi removido"}
+        return {"msg":"Id não encontrada"}
     except Exception as e:
         return {'error': str(e)}
 
