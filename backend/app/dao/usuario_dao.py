@@ -50,17 +50,18 @@ class UserDao:
         return user
 
     def update(self, user):
-        params = [user['nome'], user['email'], user['telefone'], user['login'], user['senha'], user['id']]
+        params = [user['nome'], user['cpf'], user['email'], user['telefone'], user['login'], user['senha'], user['id']]
         
         self.connect()
         result = self.cursor.execute("""
                     UPDATE usuario 
-                    SET nome = :nome, 
-                    email = :email, 
-                    telefone = :telefone,
-                    login = :login, 
-                    senha = :senha
-                    WHERE id = :id;
+                    SET nome = ?, 
+                    cpf = ?,
+                    email = ?, 
+                    telefone = ?,
+                    login = ?, 
+                    senha = ?
+                    WHERE id = ?;
                   """, params) 
         modified_registers = result.rowcount 
         self.conn.commit() 

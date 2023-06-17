@@ -26,21 +26,24 @@ cursor.execute("""
     editora VARCHAR(255),
     tipo_livro VARCHAR(255),
     impresso BOOLEAN,
-    localizacao VARCHAR(255)
+    localizacao VARCHAR(255),
+    emprestado BOOLEAN DEFAULT false
   );
 
 """)
 print("Tabela livros criada com sucesso")
 
 cursor.execute("""
-  CREATE TABLE usuarioTemLivro(
+  CREATE TABLE emprestimos(
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    idLivro INTEGER,
-    idUsuario INTEGER,
-    FOREIGN KEY (idLivro) REFERENCES Livros(id),
-    FOREIGN KEY (idUsuario) REFERENCES Usuario(id)
+    id_livro INTEGER,
+    id_usuario INTEGER,
+    data_emprestimo DATE,
+    data_devolucao DATE,
+    FOREIGN KEY (id_livro) REFERENCES livros(id),
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id)
   );
 """)
-print("Tabela usuarioTemLivro criada com sucesso")
+print("Tabela emprestimos criada com sucesso")
 connection.commit()
 connection.close()

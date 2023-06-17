@@ -9,6 +9,7 @@ def save():
     print("Method save called")
     try:
         if request.json: 
+            print(request.json)
             if 'titulo' in request.json \
             and 'autor' in request.json \
             and 'ano_publicacao' in request.json \
@@ -43,8 +44,10 @@ def get_book_by_author(autor):
                 book_obj["tipo_livro"] = book[5]
                 book_obj["impresso"] = book[6]
                 book_obj["localizacao"] = book[7]
+                book_obj["emprestado"] = book[8]
                 books_list.append(book_obj)
         return jsonify(books_list)
+    
     except Exception as e:
         return{'error': str(e)}
 
@@ -58,6 +61,7 @@ def get_book_by_name(name):
         if len(books) > 0:
             for book in books:
                 book_obj = {}
+                book_obj["id"] = book[0]
                 book_obj["titulo"] = book[1]
                 book_obj["autor"] = book[2]
                 book_obj["ano_publicacao"] = book[3]
@@ -65,13 +69,15 @@ def get_book_by_name(name):
                 book_obj["tipo_livro"] = book[5]
                 book_obj["impresso"] = book[6]
                 book_obj["localizacao"] = book[7]
+                book_obj["emprestado"] = book[8]
                 books_list.append(book_obj)
         return jsonify(books_list)
+        
     except Exception as e:
         return{'error': str(e)}
 
 
-@livros_routes.route("/api/v1/livros", methods=["PUT"])
+@livros_routes.route("/api/v1/livros/atualizar", methods=["PUT"])
 def update():
     print("updeitou")
     try:
